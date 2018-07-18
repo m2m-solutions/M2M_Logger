@@ -1,6 +1,6 @@
 //---------------------------------------------------------------------------------------------
 //
-// Library for logging to Serial and SD card
+// Library for logging to Serial port and SD card
 //
 // Copyright 2016-2018, M2M Solutions AB
 // Written by Jonny Bergdahl, 2018-06-12
@@ -8,7 +8,6 @@
 // Licensed under the MIT license, see the LICENSE.txt file.
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////
-
 #ifndef __M2M_LOGGER_h__
 #define __M2M_LOGGER_h__
 #include "Arduino.h"
