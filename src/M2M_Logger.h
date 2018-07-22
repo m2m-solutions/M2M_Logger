@@ -17,9 +17,6 @@
 #if defined(ARDUINO_ARCH_AVR)
 #include "SoftwareSerial.h"
 #endif
-#if defined(ARDUINO_ARCH_SAMD)
-#define vsnprintf_P vsnprintf
-#endif
 
 #define SD_FLUSH_TIMEOUT	4096
 
@@ -42,14 +39,43 @@ public:
 	void setIncludeTimestamp(bool value);
 	void setIncludeLogLevel(bool value);
 
-	void error(const char* message, ...);
-	void info(const char* message, ...);
-	void debug(const char* message, ...);
-	void trace(const char* message, ...);
-	void traceStart(const char* message, ...);
-	void tracePart(const char* message, ...);
-	void tracePartHexDump(void* buffer, uint32_t size);
-	void traceEnd(const char* message, ...);
+	template <class T, typename... Args>
+	void error(T message, Args... args)
+	{
+		log(LogLevel::Error, false, true, message, args...);
+	}
+	template <class T, typename... Args>
+	void info(T message, Args... args)
+	{
+		log(LogLevel::Info, false, true, message, args...);
+	}
+	template <class T, typename... Args>
+	void debug(T message, Args... args)
+	{
+		log(LogLevel::Debug, false, true, message, args...);
+	}
+	template <class T, typename... Args>
+	void trace(T message, Args... args)
+	{
+		log(LogLevel::Trace, false, true, message, args...);
+	}
+
+	template <class T, typename... Args>
+	void traceStart(T message, Args... args)
+	{
+		log(LogLevel::Trace, false, false, message, args...);
+	}
+	template <class T, typename... Args>
+	void tracePart(T message, Args... args)
+	{
+		log(LogLevel::Trace, true, false, message, args...);
+	}
+	void tracePartHexDump(const void* buffer, uint32_t size);
+	template <class T, typename... Args>
+	void traceEnd(T message, Args... args)
+	{
+		log(LogLevel::Trace, true, true, message, args...);
+	}
 
 private:
 	LogLevel _logLevel = LogLevel::Info;
@@ -60,11 +86,10 @@ private:
 	bool _includeLogLevel = false;
 	bool _isActive = false;
 
-	void log(LogLevel logLevel, bool isPart, bool writeLinefeed, const char* message, va_list* args);
-	void printFormat(Print* logger, const char format, va_list* args);
+	void log(LogLevel logLevel, bool isPart, bool writeLinefeed, const char* message, ...);
+	void log(LogLevel logLevel, bool isPart, bool writeLinefeed, const __FlashStringHelper* message, ...);
+	void printPrefix(LogLevel logLevel);
 	void print(const char *logLine);
 };
-
-extern Logger Log;
 
 #endif

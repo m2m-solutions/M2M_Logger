@@ -1,4 +1,5 @@
 #include "M2M_Logger.h"
+#include <avr/pgmspace.h>
 
 void Logger::begin(Print *logger, LogLevel logLevel)
 {
@@ -33,76 +34,19 @@ void Logger::setIncludeLogLevel(bool value)
 	_includeLogLevel = value;
 }
 
-void Logger::error(const char* message, ...)
-{
-	va_list args;
-	va_start(args, message);
-	log(LogLevel::Error, false, true, message, &args);
-	va_end(args);	
-}
-
-void Logger::info(const char* message, ...)
-{
-	va_list args;
-	va_start(args, message);
-	log(LogLevel::Info, false, true, message, &args);
-	va_end(args);	
-}
-
-void Logger::debug(const char* message, ...)
-{
-	va_list args;
-	va_start(args, message);
-	log(LogLevel::Debug, false, true, message, &args);
-	va_end(args);	
-}
-
-void Logger::trace(const char* message, ...)
-{
-	va_list args;
-	va_start(args, message);
-	log(LogLevel::Trace, false, true, message, &args);
-	va_end(args);	
-}
-
-void Logger::traceStart(const char* message, ...)
-{
-	va_list args;
-	va_start(args, message);
-	log(LogLevel::Trace, false, false, message, &args);
-	va_end(args);	
-}
-
-void Logger::tracePart(const char* message, ...)
-{
-	va_list args;
-	va_start(args, message);
-	log(LogLevel::Trace, true, false, message, &args);
-	va_end(args);	
-}
-
-void Logger::tracePartHexDump(void* buffer, uint32_t size)
+void Logger::tracePartHexDump(const void* buffer, uint32_t size)
 {
 	char hexValue[4];
-	uint8_t* pointer = static_cast<uint8_t*>(buffer); 
-	for (int i=0; i < size; i++)
+	const uint8_t* pointer = static_cast<const uint8_t*>(buffer); 
+	for (uint32_t i=0; i < size; i++)
 	{
-		snprintf(hexValue, sizeof(hexValue), "%2x ", pointer[i]);
+		sprintf_P(hexValue, "%2x ", pointer[i]);
 		log(LogLevel::Trace, true, false, hexValue, nullptr);
 	}
 }
 
-void Logger::traceEnd(const char* message, ...)
-{
-	va_list args;
-	va_start(args, message);
-	log(LogLevel::Trace, true, true, message, &args);
-	va_end(args);	
-}
-
 // Private
-
-void Logger::log(LogLevel logLevel, bool isPart, bool writeLinefeed, const char* format, va_list* args)
+void Logger::log(LogLevel logLevel, bool isPart, bool writeLinefeed, const char* format, ...)
 {
 	char buffer[128];
 
@@ -112,40 +56,75 @@ void Logger::log(LogLevel logLevel, bool isPart, bool writeLinefeed, const char*
 	}
 	if (!isPart)
 	{
-		if (_includeTimestamp)
-		{
-			unsigned long timestamp = millis();			
-			snprintf(buffer, sizeof(buffer), "%011u ", timestamp);
-			print(buffer);
-		}
-		if (_includeLogLevel)
-		{
-			switch (logLevel)
-			{
-				case LogLevel::Debug:
-				print("DBG ");
-				break;
-			case LogLevel::Error:
-				print("ERR ");
-				break;
-			case LogLevel::Info:
-				print("INF ");
-				break;
-			case LogLevel::Trace:
-				print("TRC ");
-				break;
-			case LogLevel::NoOutput:
-				break;
-			}
-		}
+		printPrefix(logLevel);
 	}
-	vsnprintf(buffer, sizeof(buffer), format, *args);
+	va_list args;
+	va_start(args, format);
+	vsnprintf(buffer, sizeof(buffer), format, args);
+	va_end(args);
 
 	print(buffer);
 
 	if (writeLinefeed)
 	{
 		print("\r\n");
+	}
+}
+
+void Logger::log(LogLevel logLevel, bool isPart, bool writeLinefeed, const __FlashStringHelper* format, ...)
+{
+	char buffer[128];
+
+	if (!_isActive || _logLevel < logLevel)
+	{
+		return;
+	}
+	if (!isPart)
+	{
+		printPrefix(logLevel);
+	}
+	PGM_P p = reinterpret_cast<PGM_P>(format);
+	va_list args;
+	va_start(args, format);
+	snprintf_P(buffer, sizeof(buffer), p, args);
+	va_end(args);
+
+	print(buffer);
+
+	if (writeLinefeed)
+	{
+		print("\r\n");
+	}
+}
+
+void Logger::printPrefix(LogLevel logLevel)
+{
+	char buffer[16];
+	if (_includeTimestamp)
+	{
+		unsigned long timestamp = millis();			
+		snprintf(buffer, sizeof(buffer), "%011lu ", timestamp);
+		print(buffer);
+	}
+	if (_includeLogLevel)
+	{
+		switch (logLevel)
+		{
+			case LogLevel::Debug:
+			print("DBG ");
+			break;
+		case LogLevel::Error:
+			print("ERR ");
+			break;
+		case LogLevel::Info:
+			print("INF ");
+			break;
+		case LogLevel::Trace:
+			print("TRC ");
+			break;
+		case LogLevel::NoOutput:
+			break;
+		}
 	}
 }
 
@@ -165,5 +144,3 @@ void Logger::print(const char *logLine)
 		}
 	}
 }
-
-Logger Log;
