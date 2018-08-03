@@ -77,6 +77,9 @@ public:
 		log(LogLevel::Trace, true, true, message, args...);
 	}
 
+	void log(LogLevel logLevel, bool isPart, bool writeLinefeed, const char* message, ...);
+	void log(LogLevel logLevel, bool isPart, bool writeLinefeed, const __FlashStringHelper* message, ...);
+
 private:
 	LogLevel _logLevel = LogLevel::Info;
 	Print* _serialLog = nullptr;
@@ -86,8 +89,6 @@ private:
 	bool _includeLogLevel = false;
 	bool _isActive = false;
 
-	void log(LogLevel logLevel, bool isPart, bool writeLinefeed, const char* message, ...);
-	void log(LogLevel logLevel, bool isPart, bool writeLinefeed, const __FlashStringHelper* message, ...);
 	void printPrefix(LogLevel logLevel);
 	void print(const char *logLine);
 };

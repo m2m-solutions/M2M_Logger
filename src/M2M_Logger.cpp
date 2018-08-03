@@ -1,5 +1,10 @@
 #include "M2M_Logger.h"
 #include <avr/pgmspace.h>
+#include <stdio.h>
+
+#ifndef vsnprintf_P
+#define vsnprintf_P(s, f, ...) vsnprintf((s), (f), __VA_ARGS__)
+#endif
 
 void Logger::begin(Print *logger, LogLevel logLevel)
 {
@@ -40,7 +45,7 @@ void Logger::tracePartHexDump(const void* buffer, uint32_t size)
 	const uint8_t* pointer = static_cast<const uint8_t*>(buffer); 
 	for (uint32_t i=0; i < size; i++)
 	{
-		sprintf_P(hexValue, "%2x ", pointer[i]);
+		sprintf_P(hexValue, "%02x ", pointer[i]);
 		log(LogLevel::Trace, true, false, hexValue, nullptr);
 	}
 }
@@ -83,10 +88,11 @@ void Logger::log(LogLevel logLevel, bool isPart, bool writeLinefeed, const __Fla
 	{
 		printPrefix(logLevel);
 	}
-	PGM_P p = reinterpret_cast<PGM_P>(format);
+
+	PGM_P pointer = reinterpret_cast<PGM_P>(format);
 	va_list args;
 	va_start(args, format);
-	snprintf_P(buffer, sizeof(buffer), p, args);
+	vsnprintf_P(buffer, sizeof(buffer), pointer, args);
 	va_end(args);
 
 	print(buffer);
