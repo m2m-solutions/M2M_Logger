@@ -50,6 +50,33 @@ void Logger::tracePartHexDump(const void* buffer, uint32_t size)
 	}
 }
 
+void Logger::tracePartAsciiDump(const void* buffer, uint32_t size)
+{
+	const uint8_t* pointer = static_cast<const uint8_t*>(buffer);	
+	char output[2];
+	output[1] = 0;
+	for (uint32_t i=0; i < size; i++)
+	{
+		output[0] = char(pointer[i]);
+
+		if (pointer[i] == 0x0a)
+		{
+			log(LogLevel::Trace, true, false, "<LF>", nullptr);
+			continue;
+		}
+		if (pointer[i] == 0x0d)
+		{
+			log(LogLevel::Trace, true, false, "<CR>", nullptr);
+			continue;
+		}
+		if (pointer[i] < 0x20 || (pointer[i] > 0x7e && pointer[i] < 0xa0))
+		{
+			output[0] = '.';	
+		}
+		log(LogLevel::Trace, true, false, output, nullptr);
+	}
+}
+
 // Private
 void Logger::log(LogLevel logLevel, bool isPart, bool writeLinefeed, const char* format, ...)
 {

@@ -5,7 +5,7 @@
 // Change the following line 
 #define LOG_FILENAME   "log.txt"
 
-const char* text = "1234567890";
+const char* text = "Line1\nLine2\n1234567890";
 Logger Log;
 
 void setup() {
@@ -61,6 +61,11 @@ void WriteLogLines()
   Log.traceEnd(F(" End of trace"));
   
   Log.traceStart(F("Hex dump of text variable: 0x"));
-  Log.tracePartHexDump(text, 10);
+  Log.tracePartHexDump(text, strlen(text));
+  Log.traceEnd(F(""));
+
+  Log.traceStart(F("ASCII dump of text variable: "));
+  Log.tracePartAsciiDump(text, strlen(text));
   Log.traceEnd(F(""));  
+
 }

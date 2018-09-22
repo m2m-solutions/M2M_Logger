@@ -71,6 +71,7 @@ public:
 		log(LogLevel::Trace, true, false, message, args...);
 	}
 	void tracePartHexDump(const void* buffer, uint32_t size);
+	void tracePartAsciiDump(const void* buffer, uint32_t size);
 	template <class T, typename... Args>
 	void traceEnd(T message, Args... args)
 	{
