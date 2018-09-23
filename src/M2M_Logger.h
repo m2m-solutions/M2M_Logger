@@ -36,6 +36,7 @@ public:
 	void end();
 	void setFileLogger(File* logger);
     void setLogLevel(LogLevel logLevel);
+	LogLevel getLogLevel();
 	void setIncludeTimestamp(bool value);
 	void setIncludeLogLevel(bool value);
 

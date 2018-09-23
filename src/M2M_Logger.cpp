@@ -29,6 +29,11 @@ void Logger::setLogLevel(LogLevel logLevel)
 	_logLevel = logLevel;
 }
 
+LogLevel Logger::getLogLevel()
+{
+	return _logLevel;
+}
+
 void Logger::setIncludeTimestamp(bool value)
 {
 	_includeTimestamp = value;
