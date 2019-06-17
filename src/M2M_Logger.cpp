@@ -1,7 +1,8 @@
 #include "M2M_Logger.h"
-#include <avr/pgmspace.h>
 #include <stdio.h>
-
+#ifdef ARDUINO_ARCH_AVR
+#include <avr/pgmspace.h>
+#endif
 #ifndef vsnprintf_P
 #define vsnprintf_P(s, f, ...) vsnprintf((s), (f), __VA_ARGS__)
 #endif
@@ -44,6 +45,10 @@ void Logger::setIncludeLogLevel(bool value)
 	_includeLogLevel = value;
 }
 
+void Logger::setFlushTimeout(unsigned value)
+{
+	_flushTimeout = value;
+}
 void Logger::tracePartHexDump(const void* buffer, uint32_t size)
 {
 	char hexValue[4];
@@ -175,7 +180,7 @@ void Logger::print(const char *logLine)
 	if (_fileLog != nullptr)
 	{
 		_fileLog->print(logLine);
-		if (_lastFlush < millis() + SD_FLUSH_TIMEOUT)
+		if (_lastFlush < millis() + _flushTimeout)
 		{
 			_fileLog->flush();
 			_lastFlush = millis();

@@ -11,9 +11,14 @@
 #ifndef __M2M_LOGGER_h__
 #define __M2M_LOGGER_h__
 #include "Arduino.h"
-#include "SD.h"
-
 #include <stdarg.h>
+// We need the File type. On ESPxxx this is used in SPIFFS and SD.
+// We use FS.h on ESPxxx which works for SD and SPIFFS and SD.h on all others.
+#if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
+#include <FS.h>
+#else
+#include <SD.h>
+#endif
 #if defined(ARDUINO_ARCH_AVR)
 #include "SoftwareSerial.h"
 #endif
@@ -39,6 +44,7 @@ public:
 	LogLevel getLogLevel();
 	void setIncludeTimestamp(bool value);
 	void setIncludeLogLevel(bool value);
+	void setFlushTimeout(unsigned value);
 
 	template <class T, typename... Args>
 	void error(T message, Args... args)
@@ -85,11 +91,12 @@ public:
 private:
 	LogLevel _logLevel = LogLevel::Info;
 	Print* _serialLog = nullptr;
-	Print* _fileLog = nullptr;
+	File* _fileLog = nullptr;
 	uint32_t _lastFlush = 0;
 	bool _includeTimestamp = false;
 	bool _includeLogLevel = false;
 	bool _isActive = false;
+	unsigned _flushTimeout = SD_FLUSH_TIMEOUT;
 
 	void printPrefix(LogLevel logLevel);
 	void print(const char *logLine);

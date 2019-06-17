@@ -13,7 +13,8 @@ Logger Log;
 File logFile;
 
 void setup() {
-  while (!serial) {}
+  unit64_t timeout = millis() + 2000;
+  while (!serial && timeout < millis()) {}
   serial.begin(115200);
   
   Log.begin(&serial, LogLevel::Trace);
