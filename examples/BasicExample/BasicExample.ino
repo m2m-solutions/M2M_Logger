@@ -1,7 +1,7 @@
 #include <M2M_Logger.h>
 
 // Change the following line to the serial port to use for logging.
-#define serial          SerialUSB
+#define serial          Serial
 // Change the following line 
 #define LOG_FILENAME   "log.txt"
 
@@ -9,7 +9,7 @@ const char* text = "Line1\nLine2\n1234567890";
 Logger Log;
 
 void setup() {
-  unit64_t timeout = millis() + 2000;
+  uint64_t timeout = millis() + 2000;
   while (!serial && timeout < millis()) {}
   serial.begin(115200);
   
