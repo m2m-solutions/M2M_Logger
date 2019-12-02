@@ -2,8 +2,6 @@
 
 // Change the following line to the serial port to use for logging.
 #define serial          Serial
-// Change the following line 
-#define LOG_FILENAME   "log.txt"
 
 const char* text = "Line1\nLine2\n1234567890";
 Logger Log;
